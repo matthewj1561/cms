@@ -1,0 +1,36 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <h1>{{ currentContact.name }}</h1>
+        </div>
+      </div>
+      <div class="row wrapper vcenter-item">
+        <div class="col-xs-8">
+          <img
+            [src]="currentContact.imageUrl"
+            [alt]="currentContact.name"
+            class="img-responsive"
+          />
+        </div>
+        <div class="col-xs-4">
+          <button class="btn btn-primary" type="button">Edit</button>
+          <button class="btn btn-danger" type="button">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12 font-weight-bold">
+        <strong>Email: </strong> {{ currentContact.email }}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 font-weight-bold">
+        <strong>Phone:</strong> {{ currentContact.phone }}
+      </div>
+    </div>
+  </div>
+</div>
