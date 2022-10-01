@@ -3,14 +3,14 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-12">
-          <h1>{{ currentContact.name }}</h1>
+          <h1>{{ contact.name }}</h1>
         </div>
       </div>
       <div class="row wrapper vcenter-item">
         <div class="col-xs-8">
           <img
-            [src]="currentContact.imageUrl"
-            [alt]="currentContact.name"
+            [src]="contact.imageUrl"
+            [alt]="contact.name"
             class="img-responsive"
           />
         </div>
@@ -24,12 +24,12 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-12 font-weight-bold">
-        <strong>Email: </strong> {{ currentContact.email }}
+        <strong>Email: </strong> {{ contact.email }}
       </div>
     </div>
     <div class="row">
       <div class="col-xs-12 font-weight-bold">
-        <strong>Phone:</strong> {{ currentContact.phone }}
+        <strong>Phone:</strong> {{ contact.phone }}
       </div>
     </div>
   </div>
