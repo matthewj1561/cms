@@ -1,4 +1,5 @@
 import { EventEmitter, Output, Component, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Document } from '../document.model';
 import { DocumentService } from '../document.service';
 
@@ -9,12 +10,18 @@ import { DocumentService } from '../document.service';
 })
 export class DocumentListComponent implements OnInit {
   documents: Document[] = [];
+  private subscription: Subscription;
+  
   constructor(private documentService: DocumentService) {}
 
   ngOnInit(): void {
     this.documents = this.documentService.getDocuments();
-    this.documentService.documentChangedEvent.subscribe((docs: Document[]) => {
+    this.subscription = this.documentService.documentChangedEvent.subscribe((docs: Document[]) => {
       this.documents = docs;
     });
+  }
+
+  ngOnDestory(): void {
+    this.subscription.unsubscribe();
   }
 }
