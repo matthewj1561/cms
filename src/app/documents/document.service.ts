@@ -13,41 +13,46 @@ export class DocumentService {
   private documents: Document[] = [];
   maxDocumentId: number;
   constructor(private http: HttpClient) {
-    http
-      .get('https://fullstack-cms-default-rtdb.firebaseio.com/documents.json')
-      .subscribe(
-        (responseData: Document[]) => {
-          this.documents = responseData;
-          this.maxDocumentId = this.getMaxId();
-          this.documents.sort((a, b) => {
-            if (a.name < b.name) {
-              return -1;
-            } else if (a.name > b.name) {
-              return 1;
-            }
-            return 0;
-          });
-          this.documentChangedEvent;
-  
-          let documentsListClone = this.documents.slice();
-          // this.documents = MOCKDOCUMENTS;
-          this.documentChangedEvent.next(documentsListClone);
-        },
-        (error: any) => {
-          console.log(error);
-        }
-      );
+    http.get('http://localhost:3000/documents').subscribe(
+      (responseData: any) => {
+        this.documents = responseData.documents;
+        this.maxDocumentId = this.getMaxId();
+        console.log(this.documents);
+        this.documents.sort((a, b) => {
+          if (a.name < b.name) {
+            return -1;
+          } else if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        });
+        this.documentChangedEvent;
+
+        let documentsListClone = this.documents.slice();
+        // this.documents = MOCKDOCUMENTS;
+        this.documentChangedEvent.next(documentsListClone);
+      },
+      (error: any) => {
+        console.log(error);
+      }
+    );
     this.maxDocumentId = this.getMaxId();
   }
 
   storeDocuments(): void {
     let jsonDocs = JSON.stringify(this.documents);
-    this.http.put('https://fullstack-cms-default-rtdb.firebaseio.com/documents.json',jsonDocs,{
-      headers:new HttpHeaders({"Content-Type": "application/json"})
-    }).subscribe(() => {
-      let documentsListClone = this.documents.slice();
-      this.documentChangedEvent.next(documentsListClone);
-    })
+    this.http
+      .put(
+        'https://fullstack-cms-default-rtdb.firebaseio.com/documents.json',
+        jsonDocs,
+        {
+          headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+        }
+      )
+      .subscribe(() => {
+        let documentsListClone = this.documents.slice();
+        this.documentChangedEvent.next(documentsListClone);
+      });
   }
 
   getDocuments(): Document[] {
@@ -66,13 +71,26 @@ export class DocumentService {
     if (newDocument == null) {
       return;
     }
-
+    newDocument.id = '';
     this.maxDocumentId++;
     newDocument.id = this.maxDocumentId.toString();
     this.documents.push(newDocument);
-    let documentsListClone = this.documents.slice();
     // this.documentChangedEvent.next(documentsListClone);
-    this.storeDocuments();
+    // add to database
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    this.http
+      .post<{ message: string; newDocument: Document }>(
+        'http://localhost:3000/documents',
+        newDocument,
+        { headers: headers }
+      )
+      .subscribe((responseData) => {
+        // add new document to documents
+        // this.documents.push(responseData.newDocument);
+        let documentsListClone = this.documents.slice();
+        this.documentChangedEvent.next(documentsListClone);
+      });
   }
 
   updateDocument(originalDocument: Document, newDocument: Document) {
@@ -89,7 +107,18 @@ export class DocumentService {
     this.documents[pos] = newDocument;
     let documentsListClone = this.documents.slice();
     // this.documentChangedEvent.next(documentsListClone);
-    this.storeDocuments();
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    // update database
+    this.http
+      .put(
+        'http://localhost:3000/documents/' + originalDocument.id,
+        newDocument,
+        { headers: headers }
+      )
+      .subscribe((response: Response) => {
+        this.documents[pos] = newDocument;
+      });
   }
 
   getMaxId(): number {
@@ -113,8 +142,13 @@ export class DocumentService {
     if (pos < 0) {
       return;
     }
-    this.documents.splice(pos, 1);
-    // this.documentChangedEvent.next(this.documents.slice());
-    this.storeDocuments();
+    // delete from database
+    this.http
+      .delete('http://localhost:3000/documents/' + document.id)
+      .subscribe((response: Response) => {
+        this.documents.splice(pos, 1);
+        let documentsListClone = this.documents.slice();
+        this.documentChangedEvent.next(documentsListClone);
+      });
   }
 }

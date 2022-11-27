@@ -3,50 +3,54 @@ import { Message } from './message.model';
 import { MOCKMESSAGES } from './MOCKMESSAGES';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-
 @Injectable({
   providedIn: 'root',
 })
 export class MessageService {
   messageChangedEvent = new EventEmitter<Message[]>();
   private messages: Message[] = [];
-  private maxMessageId : number;
-  constructor(private http: HttpClient ) {
-    http
-      .get('https://fullstack-cms-default-rtdb.firebaseio.com/messages.json')
-      .subscribe(
-        (responseData: Message[]) => {
-          this.messages = responseData;
-          this.maxMessageId = this.getMaxId();
-          // this.messages.sort((a, b) => {
-          //   if (a.name < b.name) {
-          //     return -1;
-          //   } else if (a.name > b.name) {
-          //     return 1;
-          //   }
-          //   return 0;
-          // });
-          // this.documentChangedEvent;
-  
-          let messageListClone = this.messages.slice();
-          // this.documents = MOCKDOCUMENTS;
-          this.messageChangedEvent.next(messageListClone);
-        },
-        (error: any) => {
-          console.log(error);
+  private maxMessageId: number;
+  constructor(private http: HttpClient) {
+    http.get('http://localhost:3000/messages').subscribe(
+      (responseData: any) => {
+        this.messages = responseData.messages;
+        console.log(this.messages);
+        this.maxMessageId = this.getMaxId();
+        // this.messages.sort((a, b) => {
+        //   if (a.name < b.name) {
+        //     return -1;
+        //   } else if (a.name > b.name) {
+        //     return 1;
+        //   }
+        //   return 0;
+        // });
+        // this.documentChangedEvent;
+
+        let messageListClone = this.messages.slice();
+        // this.documents = MOCKDOCUMENTS;
+        this.messageChangedEvent.next(messageListClone);
+      },
+      (error: any) => {
+        console.log(error);
       }
-      );
+    );
     this.maxMessageId = this.getMaxId();
   }
 
   storeMessages(): void {
     let jsonDocs = JSON.stringify(this.messages);
-    this.http.put('https://fullstack-cms-default-rtdb.firebaseio.com/messages.json',jsonDocs,{
-      headers:new HttpHeaders({"Content-Type": "application/json"})
-    }).subscribe(() => {
-      let messageListClone = this.messages.slice();
-      this.messageChangedEvent.next(messageListClone);
-    })
+    this.http
+      .put(
+        'https://fullstack-cms-default-rtdb.firebaseio.com/messages.json',
+        jsonDocs,
+        {
+          headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+        }
+      )
+      .subscribe(() => {
+        let messageListClone = this.messages.slice();
+        this.messageChangedEvent.next(messageListClone);
+      });
   }
 
   getMessages(): Message[] {
@@ -73,9 +77,23 @@ export class MessageService {
 
     return maxId;
   }
-  addMessage(message: Message) {
-    this.messages.push(message);
+  addMessage(newMessage: Message) {
+    newMessage.id = this.getMaxId().toString();
+    this.messages.push(newMessage);
     // this.messageChangedEvent.emit(this.messages.slice());
-    this.storeMessages();
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    this.http
+      .post<{ message: string; newMessage: Message }>(
+        'http://localhost:3000/messages',
+        newMessage,
+        { headers: headers }
+      )
+      .subscribe((responseData) => {
+        // add new document to documents
+
+        let messageListClone = this.messages.slice();
+        this.messageChangedEvent.next(messageListClone);
+      });
   }
 }

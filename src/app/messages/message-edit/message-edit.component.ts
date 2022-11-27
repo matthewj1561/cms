@@ -14,7 +14,7 @@ import { MessageService } from '../message.service';
   styleUrls: ['./message-edit.component.css'],
 })
 export class MessageEditComponent implements OnInit {
-  currentSender: string = '19';
+  currentSender: string = '101';
   subject: string;
   msgText: string;
   @Output() addMessageEvent = new EventEmitter<Message>();
@@ -30,7 +30,7 @@ export class MessageEditComponent implements OnInit {
     this.msgText = this.messageInput.nativeElement.value;
 
     let newMessage: Message = new Message(
-      this.currentSender,
+      "0",
       this.subject,
       this.msgText,
       this.currentSender
